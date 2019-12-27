@@ -10,6 +10,12 @@ interface IShortcuts {
     [shortcut: string]: string;
 }
 
+interface IGuessCache {
+    [shortcut: string]: IUniverseNamesDataUnit | undefined;
+}
+
+export type searchFunction = 'searchType' | 'searchRegion' | 'searchSystem';
+
 export class GuessService {
 
     public static readonly shortcuts: IShortcuts = {
@@ -28,6 +34,8 @@ export class GuessService {
         vni: 'Vexor Navy Issue',
     };
 
+    private static guessCache: IGuessCache = {};
+
     private static matchWithRegex(possibility: IUniverseNamesDataUnit, regex: RegExp) {
         return possibility.name ? possibility.name.match(regex) || undefined : undefined;
     }
@@ -36,6 +44,8 @@ export class GuessService {
         return text.replace(/'/g, '').replace(/"/g, '');
     }
 
+    public readonly longestAllowed: number;
+
     private readonly debug = debug.extend('GuessService');
     private readonly universeCacheController: UniverseCacheController;
     private readonly esiService: ESIService;
@@ -43,39 +53,63 @@ export class GuessService {
     constructor(universeCacheController: UniverseCacheController, esiService: ESIService) {
         this.universeCacheController = universeCacheController;
         this.esiService = esiService;
+
+        this.longestAllowed = Math.max(...([
+            ...this.universeCacheController.types,
+            ...this.universeCacheController.regions,
+            ...this.universeCacheController.systems,
+        ].map((el) => el.name.length)));
     }
 
     public async searchRegion(query: string) {
-        return this.search(query, this.universeCacheController.regions, this.universeCacheController.regionsFuse);
+        return this.searchWithCache(query, this.universeCacheController.regions, this.universeCacheController.regionsFuse);
     }
 
     public async searchSystem(query: string) {
-        return this.search(query, this.universeCacheController.systems, this.universeCacheController.systemsFuse);
+        return this.searchWithCache(query, this.universeCacheController.systems, this.universeCacheController.systemsFuse);
     }
 
     public async searchType(query: string) {
-        return this.search(query, this.universeCacheController.types, this.universeCacheController.typesFuse);
+        return this.searchWithCache(query, this.universeCacheController.types, this.universeCacheController.typesFuse);
+    }
+
+    private async searchWithCache(query: string, data: IUniverseNamesData, fuse: EVEFuse) {
+
+        query = query.trim();
+
+        if (query in GuessService.guessCache) {
+            this.debug(`(Cache): ${query} -> ${GuessService.guessCache[query]!.name}`);
+            return GuessService.guessCache[query];
+        }
+
+        const answer = await this.search(query, data, fuse);
+
+        GuessService.guessCache[query] = answer;
+        this.debug(`(Guess): ${query} -> ${answer?.name}`);
+
+        return answer;
     }
 
     private async search(query: string, data: IUniverseNamesData, fuse: EVEFuse, raw = true): Promise<IUniverseNamesDataUnit | undefined> {
         query = escapeStringRegexp(query);
 
+        // Check if the item is an ID
+        const id = Number(query);
+        if (!isNaN(id)) {
+            const item = data.find((possibility) => possibility.id === id);
+
+            if (item) {
+                const publishedItems = await this.filterUnpublishedTypes([item]);
+                if (publishedItems.length) {
+                    return item;
+                }
+            }
+        }
+
         let possibilities: IUniverseNamesData = [];
         let answer: IUniverseNamesDataUnit | undefined;
 
         const words = query.split(' ');
-
-        // Check if the item is an ID
-        const possibleId = Number(words[0]);
-        if (!isNaN(possibleId)) {
-            possibilities.push(...data.filter((possibility): boolean => possibility.id === possibleId));
-            possibilities = await this.filterUnpublishedTypes(possibilities);
-            this.sortArrayByObjectPropertyLength(possibilities, 'name');
-            if (possibilities.length) {
-                this.debug(`#${query} -> ${possibilities[0].name}`);
-                return possibilities[0];
-            }
-        }
 
         // Check if word is defined as a shortcut.
         const shortcutRegex = new RegExp(`^${words[0]}`, 'i');
@@ -130,10 +164,10 @@ export class GuessService {
 
         if (possibilities.length) {
             // Sort by word length, shortest is usually the correct one.
-            let sortedPossibilities = this.sortArrayByObjectPropertyLength(possibilities, 'name');
-            sortedPossibilities = await this.filterUnpublishedTypes(sortedPossibilities);
-            if (sortedPossibilities.length) {
-                answer = sortedPossibilities[0];
+            possibilities = await this.filterUnpublishedTypes(possibilities);
+            possibilities = this.sortArrayByObjectPropertyLength(possibilities, 'name');
+            if (possibilities.length) {
+                answer = possibilities[0];
             }
         }
 
@@ -150,25 +184,24 @@ export class GuessService {
             answer = await this.search(query, list, fuse, false);
         }
 
-        this.debug(`${query} -> ${answer?.name}`);
-
         return answer;
     }
 
     private async filterUnpublishedTypes(possibilities: IUniverseNamesData): Promise<IUniverseNamesData> {
 
-        for (const possibility of possibilities) {
+        const filteredPossibilities: IUniverseNamesData = [];
 
+        await Promise.all(possibilities.map(async (possibility) => {
             if (possibility.category === 'inventory_type') {
                 const type = await this.esiService.getType(possibility.id);
                 if (!type || !type.published) {
-                    continue;
+                    return;
                 }
             }
-            return [possibility];
-        }
+            filteredPossibilities.push(possibility);
+        }));
 
-        return [];
+        return filteredPossibilities;
     }
 
     private sortArrayByObjectPropertyLength<T>(array: T[], property: string, inverse = false): T[] {

@@ -5,6 +5,8 @@ import { AxiosError, AxiosInstance } from 'axios';
 
 import { debug } from '../index';
 
+export type fetchFunction = 'getRegions' | 'getSystems' | 'getTypes';
+
 export class ESIService {
 
     private readonly debug = debug.extend('ESIService');

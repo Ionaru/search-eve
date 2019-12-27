@@ -1,6 +1,5 @@
 
 import { CacheController, PublicESIService } from '@ionaru/esi-service';
-// tslint:disable-next-line:no-implicit-dependencies
 import { ServiceController } from '@ionaru/micro-web-service';
 import { HttpsAgent } from 'agentkeepalive';
 import axios from 'axios';
@@ -34,8 +33,7 @@ async function start() {
         maxContentLength: 50000000,
     });
 
-    cacheController = new CacheController(path.join(dataFolder, 'cache.json'));
-    cacheController.readCache();
+    cacheController = new CacheController(path.join(dataFolder, 'requests.json'));
     const publicESIService = new PublicESIService({
         axiosInstance,
         cacheController,

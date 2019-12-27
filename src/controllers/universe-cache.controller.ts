@@ -5,9 +5,7 @@ import * as path from 'path';
 
 import { EVEFuse } from '../EVEFuse';
 import { debug } from '../index';
-import { ESIService } from '../services/esi.service';
-
-type fetchFunctionType = 'getRegions' | 'getSystems' | 'getTypes';
+import { ESIService, fetchFunction } from '../services/esi.service';
 
 export class UniverseCacheController {
 
@@ -53,6 +51,10 @@ export class UniverseCacheController {
     constructor(dataPath: string, esiService: ESIService) {
         this.dataPath = dataPath;
         this.esiService = esiService;
+
+        if (!fs.existsSync(this.dataPath)) {
+            fs.mkdirSync(this.dataPath, {recursive: true});
+        }
     }
 
     public async doUpdateCycle() {
@@ -117,7 +119,7 @@ export class UniverseCacheController {
         return false;
     }
 
-    private async cacheUniverse(useCache: boolean, type: string, fetchFunction: fetchFunctionType): Promise<IUniverseNamesData> {
+    private async cacheUniverse(useCache: boolean, type: string, fetcher: fetchFunction): Promise<IUniverseNamesData> {
         const savePath = `${this.dataPath}/${type}.json`;
 
         if (useCache) {
@@ -136,7 +138,7 @@ export class UniverseCacheController {
 
         this.debug(`No valid cached ${type} available, updating from API`);
 
-        const data = await this.esiService[fetchFunction]();
+        const data = await this.esiService[fetcher]();
         if (data) {
             const names = await this.esiService.getNames(data).catch(() => []);
             if (names.length === data.length) {
@@ -151,7 +153,7 @@ export class UniverseCacheController {
             if (!useCache) {
                 // Attempt to load from cache if we didn't try that already.
                 process.emitWarning(`Attempting to get ${type} from cache`);
-                return this.cacheUniverse(true, type, fetchFunction).catch(() => []);
+                return this.cacheUniverse(true, type, fetcher).catch(() => []);
             }
         }
         return [];
