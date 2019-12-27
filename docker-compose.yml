@@ -1,0 +1,13 @@
+version: '3'
+services:
+
+    therabot:
+        build: .
+        environment:
+            - DEBUG
+        restart: unless-stopped
+        volumes:
+            - ${ITEMSEARCH_DATA_VOLUME:-data-volume}:/app/data
+
+volumes:
+    data-volume:

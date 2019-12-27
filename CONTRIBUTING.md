@@ -2,12 +2,12 @@
 
 Hey, welcome to the party! 🎉
 
-Thank you so much for your interest in contributing to item-search!
+Thank you so much for your interest in contributing to search-eve!
 
 
 ## Asking questions, suggesting wonderful ideas or reporting bugs
 
-You can [submit an issue️](https://github.com/Ionaru/item-search/issues) on this GitHub repository.
+You can [submit an issue️](https://github.com/Ionaru/search-eve/issues) on this GitHub repository.
 
 
 ## Coding
@@ -31,8 +31,8 @@ For other systems, please find information on [the official Node.js website](htt
 First, clone this repository:
 
 ```bash
-git clone https://github.com/Ionaru/item-search.git
-cd item-search
+git clone https://github.com/Ionaru/search-eve.git
+cd search-eve
 ```
 
 Then install the required dependencies:
@@ -49,9 +49,9 @@ Yay! You are ready! 🍾
 Please make sure any code you submit is compliant and compatible with this repository's [license](./LICENSE).
 
 #### Your first pull request
-1. [Create a fork of this project](https://github.com/Ionaru/item-search/fork).
-2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/item-search.git`.
-3. Add the original repository as remote to keep it up-to-date: `git remote add upstream https://github.com/Ionaru/item-search.git`.
+1. [Create a fork of this project](https://github.com/Ionaru/search-eve/fork).
+2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/search-eve.git`.
+3. Add the original repository as remote to keep it up-to-date: `git remote add upstream https://github.com/Ionaru/search-eve.git`.
 4. Fetch the latest changes from upstream: `git fetch upstream`.
 5. Create a new branch to work on: `git checkout -b MyNewFeatureName`.
 6. Write some awesome improvements, tests and commit your work.

@@ -1,9 +1,9 @@
-# @ionaru/item-search
+# @ionaru/search-eve
 
 ## Description
 A package for...
 
 ## Usage
 ```
-npm install @ionaru/item-search
+npm install @ionaru/search-eve
 ```

@@ -1,7 +1,7 @@
 {
-    "name": "@ionaru/item-search",
+    "name": "@ionaru/search-eve",
     "version": "0.0.0",
-    "description": "My package item-search",
+    "description": "My package search-eve",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "files": [
@@ -13,19 +13,33 @@
         "lint:src": "tslint --project tsconfig.json -c tslint.json --format stylish",
         "lint:test": "tslint -c tslint.json src/**/*.spec.ts --format stylish",
         "pretest": "npm run lint",
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "echo \"Error: no test specified\" && exit 0",
         "prepare": "npm run build",
         "preversion": "npm run test"
     },
     "keywords": [],
     "author": "Jeroen Akkerman",
-    "repository": "github:Ionaru/item-search",
+    "repository": "github:Ionaru/search-eve",
     "license": "MIT",
     "devDependencies": {
+        "@types/debug": "^4.1.5",
+        "@types/escape-string-regexp": "^2.0.1",
         "@types/node": "12.12.21",
+        "ts-node": "^8.5.4",
         "tslint": "5.20.1",
         "tslint-sonarts": "1.9.0",
         "typescript": "3.7.3"
     },
-    "dependencies": {}
+    "dependencies": {
+        "@ionaru/array-utils": "^2.0.0",
+        "@ionaru/esi-service": "^3.2.3-34.0",
+        "@ionaru/eve-utils": "^4.4.0",
+        "@ionaru/micro-web-service": "0.0.2-2.0",
+        "agentkeepalive": "^4.1.0",
+        "axios": "^0.19.0",
+        "debug": "^4.1.1",
+        "escape-string-regexp": "^2.0.0",
+        "fuse.js": "^3.4.6",
+        "moment": "^2.24.0"
+    }
 }

@@ -13,6 +13,7 @@ dist/
 
 # Local application files
 logs/
+data/
 
 # System files
 *.db
