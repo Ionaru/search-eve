@@ -1,5 +1,7 @@
 // tslint:disable-next-line:no-implicit-dependencies
 import { BaseRouter, Request, Response } from '@ionaru/micro-web-service';
+import * as httpStatus from 'http-status-codes';
+
 import { GuessService, searchFunction } from '../services/guess.service';
 
 export class MyRouter extends BaseRouter {
@@ -8,7 +10,7 @@ export class MyRouter extends BaseRouter {
 
     private static async search(request: Request, response: Response, searcher: searchFunction) {
         if (request.query.q.length > MyRouter.guessService.longestAllowed) {
-            return MyRouter.sendResponse(response, 400, 'Query too long');
+            return MyRouter.sendResponse(response, httpStatus.BAD_REQUEST, 'Query too long');
         }
 
         const answer = await MyRouter.guessService[searcher](request.query.q);
@@ -37,8 +39,8 @@ export class MyRouter extends BaseRouter {
 
     private static async shortcuts(_request: Request, response: Response) {
 
-        const s = Object.entries(GuessService.shortcuts);
-        return MyRouter.sendSuccessResponse(response, s);
+        const shortcuts = Object.entries(GuessService.shortcuts);
+        return MyRouter.sendSuccessResponse(response, shortcuts);
     }
 
     constructor(guessService: GuessService) {
