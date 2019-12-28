@@ -1,5 +1,6 @@
 FROM node:12-alpine
 
+
 ## INSTALL SERVER
 
 RUN mkdir -p /app /app/data
@@ -18,6 +19,7 @@ RUN npm run build
 
 # Add volumes
 VOLUME /app/data
+
 
 ## RUN
 
