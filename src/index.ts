@@ -47,8 +47,9 @@ async function start() {
 
     const router = new MyRouter(guessService);
 
+    const serverPort = process.env.SEARCHEVE_PORT;
     await new ServiceController({
-        port: 3000,
+        port: Number(serverPort),
         routes: [
             ['/', router],
         ],

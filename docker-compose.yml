@@ -5,6 +5,7 @@ services:
         build: .
         environment:
             - DEBUG
+            - SEARCHEVE_PORT
         restart: unless-stopped
         volumes:
             - ${SEARCHEVE_DATA_VOLUME:-data-volume}:/app/data
