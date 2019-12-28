@@ -9,7 +9,7 @@ import Debug from 'debug';
 export const debug = Debug('search-eve');
 
 import { UniverseCacheController } from './controllers/universe-cache.controller';
-import { MyRouter } from './routers/my.router';
+import { GuessRouter } from './routers/guess.router';
 import { ESIService } from './services/esi.service';
 import { GuessService } from './services/guess.service';
 
@@ -45,7 +45,7 @@ async function start() {
 
     const guessService = new GuessService(universeCacheController, esiService);
 
-    const router = new MyRouter(guessService);
+    const router = new GuessRouter(guessService);
 
     const serverPort = process.env.SEARCHEVE_PORT;
     await new ServiceController({
