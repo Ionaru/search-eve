@@ -94,16 +94,9 @@ export class GuessService {
         query = escapeStringRegexp(query);
 
         // Check if the item is an ID
-        const id = Number(query);
-        if (!isNaN(id)) {
-            const item = data.find((possibility) => possibility.id === id);
-
-            if (item) {
-                const publishedItems = await this.filterUnpublishedTypes([item]);
-                if (publishedItems.length) {
-                    return item;
-                }
-            }
+        const item = await this.getFromId(query, data);
+        if (item) {
+            return item;
         }
 
         let possibilities: IUniverseNamesData = [];
@@ -112,8 +105,7 @@ export class GuessService {
         const words = query.split(' ');
 
         // Check if word is defined as a shortcut.
-        const shortcutRegex = new RegExp(`^${words[0]}`, 'i');
-        const shortcut = Object.keys(GuessService.shortcuts).find((shortcutText) => shortcutText.match(shortcutRegex));
+        const shortcut = this.getFromShortcut(words);
         if (shortcut) {
             words[0] = GuessService.shortcuts[shortcut];
             query = words.join(' ');
@@ -185,6 +177,26 @@ export class GuessService {
         }
 
         return answer;
+    }
+
+    private getFromShortcut(words: string[]): string | undefined {
+        const shortcutRegex = new RegExp(`^${words[0]}`, 'i');
+        return Object.keys(GuessService.shortcuts).find((shortcutText) => shortcutText.match(shortcutRegex));
+    }
+
+    private async getFromId(query: string, data: IUniverseNamesData): Promise<IUniverseNamesDataUnit | undefined> {
+        const id = Number(query);
+        if (!isNaN(id)) {
+            const item = data.find((possibility) => possibility.id === id);
+
+            if (item) {
+                const publishedItems = await this.filterUnpublishedTypes([item]);
+                if (publishedItems.length) {
+                    return item;
+                }
+            }
+        }
+        return;
     }
 
     private async filterUnpublishedTypes(possibilities: IUniverseNamesData): Promise<IUniverseNamesData> {
