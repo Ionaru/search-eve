@@ -7,6 +7,19 @@ import { EVEFuse } from '../EVEFuse';
 import { debug } from '../index';
 import { ESIService, fetchFunction } from '../services/esi.service';
 
+export interface ICache {
+    [type: string]: ICacheObject;
+}
+
+export interface ICacheObject {
+    data: IUniverseNamesData;
+    fuse: EVEFuse;
+}
+
+interface ICacheTypes {
+    [type: string]: fetchFunction;
+}
+
 export class UniverseCacheController {
 
     private static readFileContents(filePath: string): string | undefined {
@@ -33,14 +46,7 @@ export class UniverseCacheController {
 
     public serverVersion?: string;
 
-    public regions: IUniverseNamesData = [];
-    public regionsFuse!: EVEFuse;
-
-    public systems: IUniverseNamesData = [];
-    public systemsFuse!: EVEFuse;
-
-    public types: IUniverseNamesData = [];
-    public typesFuse!: EVEFuse;
+    public readonly cache: ICache = {};
 
     private readonly debug = debug.extend('UniverseCacheController');
 
@@ -60,23 +66,26 @@ export class UniverseCacheController {
     public async doUpdateCycle() {
         const cacheValid = await this.checkCacheValidity();
 
-        const newRegions = await this.cacheUniverse(cacheValid, 'regions', 'getRegions');
-        const newSystems = await this.cacheUniverse(cacheValid, 'systems', 'getSystems');
-        const newTypes = await this.cacheUniverse(cacheValid, 'types', 'getTypes');
+        const cacheTypes: ICacheTypes = {
+            constellations: 'getConstellations',
+            regions: 'getRegions',
+            systems: 'getSystems',
+            types: 'getTypes',
+        };
 
-        if (!newRegions.length || !newSystems.length || !newTypes.length) {
-            fs.unlinkSync(`${this.dataPath}/${this.serverVersionFileName}`);
-            throw new Error('Universe data incomplete, unable to create new cache');
-        }
+        await Promise.all(Object.entries(cacheTypes).map(async ([type, fetcher]) => {
+            const data = await this.cacheUniverse(cacheValid, type, fetcher);
 
-        this.regions = newRegions;
-        this.regionsFuse = new EVEFuse(this.regions);
+            if (!data.length) {
+                fs.unlinkSync(`${this.dataPath}/${this.serverVersionFileName}`);
+                throw new Error('Universe data incomplete, unable to create new cache');
+            }
 
-        this.systems = newSystems;
-        this.systemsFuse = new EVEFuse(this.systems);
-
-        this.types = newTypes;
-        this.typesFuse = new EVEFuse(this.types);
+            this.cache[type] = {
+                data,
+                fuse: new EVEFuse(data),
+            };
+        }));
 
         setTimeout(() => {
             this.doUpdateCycle().catch((error: Error) => {

@@ -5,7 +5,7 @@ import { AxiosError, AxiosInstance } from 'axios';
 
 import { debug } from '../index';
 
-export type fetchFunction = 'getRegions' | 'getSystems' | 'getTypes';
+export type fetchFunction = 'getRegions' | 'getSystems' | 'getTypes' | 'getConstellations';
 
 export class ESIService {
 
@@ -24,10 +24,17 @@ export class ESIService {
         return this.fetchData<IStatusData>(EVE.getStatusUrl());
     }
 
+    // noinspection JSUnusedGlobalSymbols
     public async getRegions() {
         return this.fetchData<number[]>(EVE.getUniverseRegionsUrl());
     }
 
+    // noinspection JSUnusedGlobalSymbols
+    public async getConstellations() {
+        return this.fetchData<number[]>(EVE.getUniverseConstellationsUrl());
+    }
+
+    // noinspection JSUnusedGlobalSymbols
     public async getSystems() {
         return this.fetchData<number[]>(EVE.getUniverseSystemsUrl());
     }
@@ -36,6 +43,7 @@ export class ESIService {
         return this.fetchData<IUniverseTypeData>(EVE.getUniverseTypeUrl(id));
     }
 
+    // noinspection JSUnusedGlobalSymbols
     public async getTypes() {
 
         const url = EVE.getUniverseTypesUrl(1);

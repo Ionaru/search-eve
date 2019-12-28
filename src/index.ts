@@ -47,7 +47,7 @@ async function start() {
 
     const router = new GuessRouter(guessService);
 
-    const serverPort = process.env.SEARCHEVE_PORT;
+    const serverPort = process.env.SEARCHEVE_PORT || 3000;
     await new ServiceController({
         port: Number(serverPort),
         routes: [

@@ -1,7 +1,7 @@
 import { IUniverseNamesData, IUniverseNamesDataUnit } from '@ionaru/eve-utils';
 import * as escapeStringRegexp from 'escape-string-regexp';
 
-import { UniverseCacheController } from '../controllers/universe-cache.controller';
+import { ICacheObject, UniverseCacheController } from '../controllers/universe-cache.controller';
 import { EVEFuse } from '../EVEFuse';
 import { debug } from '../index';
 import { ESIService } from './esi.service';
@@ -14,7 +14,7 @@ interface IGuessCache {
     [shortcut: string]: IUniverseNamesDataUnit | undefined;
 }
 
-export type searchFunction = 'searchType' | 'searchRegion' | 'searchSystem';
+export type searchFunction = 'searchType' | 'searchRegion' | 'searchConstellation' | 'searchSystem';
 
 export class GuessService {
 
@@ -55,25 +55,33 @@ export class GuessService {
         this.esiService = esiService;
 
         this.longestAllowed = Math.max(...([
-            ...this.universeCacheController.types,
-            ...this.universeCacheController.regions,
-            ...this.universeCacheController.systems,
+            ...this.universeCacheController.cache.types.data,
+            ...this.universeCacheController.cache.regions.data,
+            ...this.universeCacheController.cache.systems.data,
         ].map((el) => el.name.length)));
     }
 
+    // noinspection JSUnusedGlobalSymbols
     public async searchRegion(query: string) {
-        return this.searchWithCache(query, this.universeCacheController.regions, this.universeCacheController.regionsFuse);
+        return this.searchWithCache(query, this.universeCacheController.cache.regions);
     }
 
+    // noinspection JSUnusedGlobalSymbols
+    public async searchConstellation(query: string) {
+        return this.searchWithCache(query, this.universeCacheController.cache.constellations);
+    }
+
+    // noinspection JSUnusedGlobalSymbols
     public async searchSystem(query: string) {
-        return this.searchWithCache(query, this.universeCacheController.systems, this.universeCacheController.systemsFuse);
+        return this.searchWithCache(query, this.universeCacheController.cache.systems);
     }
 
+    // noinspection JSUnusedGlobalSymbols
     public async searchType(query: string) {
-        return this.searchWithCache(query, this.universeCacheController.types, this.universeCacheController.typesFuse);
+        return this.searchWithCache(query, this.universeCacheController.cache.types);
     }
 
-    private async searchWithCache(query: string, data: IUniverseNamesData, fuse: EVEFuse) {
+    private async searchWithCache(query: string, {data, fuse}: ICacheObject) {
 
         query = query.trim();
 

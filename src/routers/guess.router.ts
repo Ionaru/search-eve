@@ -33,6 +33,11 @@ export class GuessRouter extends BaseRouter {
     }
 
     @GuessRouter.requestDecorator(GuessRouter.checkQueryParameters, 'q')
+    private static async searchConstellation(request: Request, response: Response) {
+        return GuessRouter.search(request, response, 'searchConstellation');
+    }
+
+    @GuessRouter.requestDecorator(GuessRouter.checkQueryParameters, 'q')
     private static async searchRegion(request: Request, response: Response) {
         return GuessRouter.search(request, response, 'searchRegion');
     }
@@ -49,6 +54,7 @@ export class GuessRouter extends BaseRouter {
         GuessRouter.guessService = guessService;
         this.createRoute('get', '/type', GuessRouter.searchType);
         this.createRoute('get', '/system', GuessRouter.searchSystem);
+        this.createRoute('get', '/constellation', GuessRouter.searchConstellation);
         this.createRoute('get', '/region', GuessRouter.searchRegion);
         this.createRoute('get', '/shortcuts', GuessRouter.shortcuts);
     }
