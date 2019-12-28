@@ -54,11 +54,12 @@ export class GuessService {
         this.universeCacheController = universeCacheController;
         this.esiService = esiService;
 
-        this.longestAllowed = Math.max(...([
+        this.longestAllowed = Math.max(...[
             ...this.universeCacheController.cache.types.data,
             ...this.universeCacheController.cache.regions.data,
+            ...this.universeCacheController.cache.constellations.data,
             ...this.universeCacheController.cache.systems.data,
-        ].map((el) => el.name.length)));
+        ].map((element) => element.name.length));
     }
 
     // noinspection JSUnusedGlobalSymbols
