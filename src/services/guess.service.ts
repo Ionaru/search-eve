@@ -10,9 +10,10 @@ interface IShortcuts {
     [shortcut: string]: string;
 }
 
-interface IGuessCache {
-    [shortcut: string]: IUniverseNamesDataUnit | undefined;
-}
+// tslint:disable-next-line:no-commented-code
+// interface IGuessCache {
+//     [shortcut: string]: IUniverseNamesDataUnit | undefined;
+// }
 
 export type searchFunction = 'searchType' | 'searchRegion' | 'searchConstellation' | 'searchSystem';
 
@@ -34,7 +35,7 @@ export class GuessService {
         vni: 'Vexor Navy Issue',
     };
 
-    private static guessCache: IGuessCache = {};
+    // private static guessCache: IGuessCache = {};
 
     private static matchWithRegex(possibility: IUniverseNamesDataUnit, regex: RegExp) {
         return possibility.name ? possibility.name.match(regex) || undefined : undefined;
@@ -86,14 +87,16 @@ export class GuessService {
 
         query = query.trim();
 
-        if (query in GuessService.guessCache) {
-            this.debug(`(Cache): ${query} -> ${GuessService.guessCache[query]!.name}`);
-            return GuessService.guessCache[query];
-        }
+        // tslint:disable-next-line:no-commented-code
+        // if (query in GuessService.guessCache) {
+        //     this.debug(`(Cache): ${query} -> ${GuessService.guessCache[query]!.name}`);
+        //     return GuessService.guessCache[query];
+        // }
 
         const answer = await this.search(query, data, fuse);
 
-        GuessService.guessCache[query] = answer;
+        // tslint:disable-next-line:no-commented-code
+        // GuessService.guessCache[query] = answer;
         this.debug(`(Guess): ${query} -> ${answer?.name}`);
 
         return answer;
