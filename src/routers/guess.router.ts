@@ -1,4 +1,3 @@
-// tslint:disable-next-line:no-implicit-dependencies
 import { BaseRouter, Request, Response } from '@ionaru/micro-web-service';
 import * as httpStatus from 'http-status-codes';
 
