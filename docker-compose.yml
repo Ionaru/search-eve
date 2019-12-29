@@ -1,11 +1,13 @@
 version: '3'
 services:
 
-    therabot:
+    server:
         build: .
         environment:
             - DEBUG
             - SEARCHEVE_PORT
+        ports:
+            - "${SEARCHEVE_PORT:-3000}:${SEARCHEVE_PORT:-3000}"
         restart: unless-stopped
         volumes:
             - ${SEARCHEVE_DATA_VOLUME:-data-volume}:/app/data

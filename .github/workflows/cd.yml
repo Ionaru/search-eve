@@ -34,6 +34,6 @@ jobs:
             - name: Build
               run: npm run build
 
-#            - name: Deploy
-#              if: github.event_name == 'push'
-#              run: npx -q @ionaru/teamcity-deploy teamcity.saturnserver.org SearchEVE_Build ${{ secrets.API_TOKEN }}
+            - name: Deploy
+              if: github.event_name == 'push'
+              run: npx -q @ionaru/teamcity-deploy teamcity.saturnserver.org SearchEve_Build ${{ secrets.API_TOKEN }}
