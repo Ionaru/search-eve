@@ -1,4 +1,4 @@
-import { IUniverseNamesData } from '@ionaru/eve-utils';
+import { IUniverseNamesData, IUniverseNamesDataUnit } from '@ionaru/eve-utils';
 import * as fs from 'fs';
 import * as moment from 'moment';
 import * as path from 'path';
@@ -14,6 +14,11 @@ export interface ICache {
 export interface ICacheObject {
     data: IUniverseNamesData;
     fuse: EVEFuse;
+    guesses: ICachedGuesses;
+}
+
+interface ICachedGuesses {
+    [type: string]: IUniverseNamesDataUnit | undefined;
 }
 
 interface ICacheTypes {
@@ -84,6 +89,7 @@ export class UniverseCacheController {
             this.cache[type] = {
                 data,
                 fuse: new EVEFuse(data),
+                guesses: {},
             };
         }));
 
