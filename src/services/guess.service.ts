@@ -81,7 +81,7 @@ export class GuessService {
 
     private async searchWithCache(query: string, {data, fuse, guesses}: ICacheObject) {
 
-        query = query.trim();
+        query = query.trim().toLowerCase();
 
         if (query in guesses) {
             this.debug(`(Cache): ${query} -> ${guesses[query]?.name}`);
@@ -145,7 +145,7 @@ export class GuessService {
         if (!possibilities.length) {
             // Check in middle of words.
             possibilities.push(...data.filter((possibility) => {
-                return possibility.name.toLowerCase().includes(query.toLowerCase());
+                return possibility.name.toLowerCase().includes(query);
             }));
         }
 
@@ -175,7 +175,7 @@ export class GuessService {
                 return {
                     category: possibility.category,
                     id: possibility.id,
-                    name: GuessService.replaceSpecialCharacters(possibility.name),
+                    name: GuessService.replaceSpecialCharacters(possibility.name).toLowerCase(),
                     originalName: possibility.name,
                 };
             });
