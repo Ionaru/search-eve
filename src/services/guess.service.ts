@@ -34,8 +34,11 @@ export class GuessService {
         return possibility.name ? possibility.name.match(regex) || undefined : undefined;
     }
 
-    private static replaceQuotes(text: string): string {
-        return text.replace(/'/g, '').replace(/"/g, '');
+    private static replaceSpecialCharacters(text: string): string {
+        return text
+            .replace(/'/g, '')
+            .replace(/"/g, '')
+            .replace(/,/g, '');
     }
 
     public readonly longestAllowed: number;
@@ -116,7 +119,7 @@ export class GuessService {
 
         // Check for full words.
         possibilities.push(...data.filter((possibility) => {
-            const possibilityName = GuessService.replaceQuotes(possibility.name).toLowerCase();
+            const possibilityName = GuessService.replaceSpecialCharacters(possibility.name).toLowerCase();
             const possibilityParts = possibilityName.split(' ');
             return words.every((word) => possibilityParts.includes(word));
         }));
@@ -167,12 +170,12 @@ export class GuessService {
         }
 
         if (!answer && raw) {
-            // Strip quotes from possibilities and try guessing again.
+            // Strip special characters from possibilities and try guessing again.
             const list = data.map((possibility) => {
                 return {
                     category: possibility.category,
                     id: possibility.id,
-                    name: GuessService.replaceQuotes(possibility.name),
+                    name: GuessService.replaceSpecialCharacters(possibility.name),
                     originalName: possibility.name,
                 };
             });
