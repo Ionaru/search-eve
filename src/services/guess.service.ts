@@ -84,7 +84,7 @@ export class GuessService {
         query = query.trim();
 
         if (query in guesses) {
-            this.debug(`(Cache): ${query} -> ${guesses[query]!.name}`);
+            this.debug(`(Cache): ${query} -> ${guesses[query]?.name}`);
             return guesses[query];
         }
 
