@@ -3,6 +3,7 @@ import { CacheController, PublicESIService } from '@ionaru/esi-service';
 import { ServiceController } from '@ionaru/micro-web-service';
 import { HttpsAgent } from 'agentkeepalive';
 import axios from 'axios';
+import * as cors from 'cors';
 import * as path from 'path';
 
 import Debug from 'debug';
@@ -51,6 +52,9 @@ async function start() {
 
     const serverPort = process.env.SEARCHEVE_PORT || 3000;
     await new ServiceController({
+        middleware: [
+            cors(),
+        ],
         port: Number(serverPort),
         routes: [
             ['/', guessRouter],
