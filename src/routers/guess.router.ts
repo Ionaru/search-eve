@@ -8,11 +8,17 @@ export class GuessRouter extends BaseRouter {
     private static guessService: GuessService;
 
     private static async search(request: Request, response: Response, searcher: searchFunction) {
-        if (request.query.q.length > GuessRouter.guessService.longestAllowed) {
+        const query = request.query.q.trim().toLowerCase();
+
+        if (!query.length) {
+            return GuessRouter.send404(response);
+        }
+
+        if (query.length > GuessRouter.guessService.longestAllowed) {
             return GuessRouter.sendResponse(response, httpStatus.BAD_REQUEST, 'Query too long');
         }
 
-        const answer = await GuessRouter.guessService[searcher](request.query.q);
+        const answer = await GuessRouter.guessService[searcher](query);
 
         if (!answer) {
             return GuessRouter.send404(response);

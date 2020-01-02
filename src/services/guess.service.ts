@@ -81,8 +81,6 @@ export class GuessService {
 
     private async searchWithCache(query: string, {data, fuse, guesses}: ICacheObject) {
 
-        query = query.trim().toLowerCase();
-
         if (query in guesses) {
             this.debug(`(Cache): ${query} -> ${guesses[query]?.name}`);
             return guesses[query];
