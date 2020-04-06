@@ -151,10 +151,10 @@ export class GuessService {
 
         if (!possibilities.length) {
             // Use Fuse to search (slow but fuzzy).
-            const fuseGuess = fuse.search(query)[0] as IUniverseNamesDataUnit | undefined;
+            const fuseGuess = fuse.search(query)[0];
 
             if (fuseGuess) {
-                possibilities.push(fuseGuess);
+                possibilities.push(fuseGuess.item);
             }
         }
 
