@@ -58,6 +58,7 @@ export class GuessRouter extends BaseRouter {
 
         GuessRouter.guessService = guessService;
         this.createRoute('get', '/type', GuessRouter.searchType);
+        this.createRoute('get', '/item', GuessRouter.searchType);
         this.createRoute('get', '/system', GuessRouter.searchSystem);
         this.createRoute('get', '/constellation', GuessRouter.searchConstellation);
         this.createRoute('get', '/region', GuessRouter.searchRegion);

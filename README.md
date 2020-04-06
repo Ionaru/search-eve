@@ -5,9 +5,9 @@ Search EVE is a flexible item, system, constellation and region search engine fo
 The engine will continuously update information when the game updates and keeps multiple caches for improved performance.
 
 ## How to Use
-### `/type/` (params: q)
+### `/type/` or `/item/` (params: q)
 Search types (items).
-Example: `/system/?q=dancers%20female`
+Example: `/type/?q=dancers%20female`
 
 ### `/system/` (params: q)
 Search systems.
@@ -19,7 +19,11 @@ Example: `/constellation/?q=kimotoro`
 
 ### `/region/` (params: q)
 Search regions.
-Example: `/region/?q=amarr`
+Example: `/region/?q=the%20forge`
+
+### `/shortcuts/`
+View defined search shortcuts.
+Example: `/shortcuts/`
 
 ### Configuration
 Search-EVE requires some set-up to work, this information is for developers.
