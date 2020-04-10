@@ -188,7 +188,7 @@ export class GuessService {
         return Object.keys(GuessService.shortcuts).find((shortcutText) => shortcutText.match(shortcutRegex));
     }
 
-    private async getFromId(query: string, data: IUniverseNamesData): Promise<IUniverseNamesDataUnit | undefined> {
+    private async getFromId(query: string, data: IUniverseNamesData): Promise<IUniverseNamesDataUnit | void> {
         const id = Number(query);
         if (!isNaN(id)) {
             const item = data.find((possibility) => possibility.id === id);
@@ -200,7 +200,6 @@ export class GuessService {
                 }
             }
         }
-        return;
     }
 
     private async filterUnpublishedTypes(possibilities: IUniverseNamesData): Promise<IUniverseNamesData> {
