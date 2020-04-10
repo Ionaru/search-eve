@@ -7,8 +7,8 @@ export class GuessRouter extends BaseRouter {
 
     private static guessService: GuessService;
 
-    private static async search(request: Request, response: Response, searcher: searchFunction) {
-        const query = request.query.q.trim().toLowerCase();
+    private static async search(request: Request<{}, any, any, { q?: string }>, response: Response, searcher: searchFunction) {
+        const query = request.query.q!.trim().toLowerCase();
 
         if (!query.length) {
             return GuessRouter.send404(response);
@@ -28,22 +28,22 @@ export class GuessRouter extends BaseRouter {
     }
 
     @GuessRouter.requestDecorator(GuessRouter.checkQueryParameters, 'q')
-    private static async searchType(request: Request, response: Response) {
+    private static async searchType(request: Request<{}, any, any, { q?: string }>, response: Response) {
         return GuessRouter.search(request, response, 'searchType');
     }
 
     @GuessRouter.requestDecorator(GuessRouter.checkQueryParameters, 'q')
-    private static async searchSystem(request: Request, response: Response) {
+    private static async searchSystem(request: Request<{}, any, any, { q?: string }>, response: Response) {
         return GuessRouter.search(request, response, 'searchSystem');
     }
 
     @GuessRouter.requestDecorator(GuessRouter.checkQueryParameters, 'q')
-    private static async searchConstellation(request: Request, response: Response) {
+    private static async searchConstellation(request: Request<{}, any, any, { q?: string }>, response: Response) {
         return GuessRouter.search(request, response, 'searchConstellation');
     }
 
     @GuessRouter.requestDecorator(GuessRouter.checkQueryParameters, 'q')
-    private static async searchRegion(request: Request, response: Response) {
+    private static async searchRegion(request: Request<{}, any, any, { q?: string }>, response: Response) {
         return GuessRouter.search(request, response, 'searchRegion');
     }
 
