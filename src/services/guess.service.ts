@@ -3,7 +3,7 @@ import * as escapeStringRegexp from 'escape-string-regexp';
 
 import { ICacheObject, UniverseCacheController } from '../controllers/universe-cache.controller';
 import { EVEFuse } from '../EVEFuse';
-import { debug } from '../index';
+import { debug } from '../debug';
 import { ESIService } from './esi.service';
 
 interface IShortcuts {

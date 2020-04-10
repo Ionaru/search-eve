@@ -6,9 +6,6 @@ import axios from 'axios';
 import * as cors from 'cors';
 import * as path from 'path';
 
-import Debug from 'debug';
-export const debug = Debug('search-eve');
-
 import { UniverseCacheController } from './controllers/universe-cache.controller';
 import { GuessRouter } from './routers/guess.router';
 import { NotFoundRouter } from './routers/not-found.router';
@@ -85,7 +82,4 @@ async function stop() {
     process.exit(0);
 }
 
-// Prevent file from running when importing from it.
-if (require.main === module) {
-    start().then();
-}
+start().then();

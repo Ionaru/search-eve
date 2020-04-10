@@ -3,7 +3,7 @@ import { CacheController, PublicESIService } from '@ionaru/esi-service';
 import { EVE, IStatusData, IUniverseNamesData, IUniverseTypeData } from '@ionaru/eve-utils';
 import { AxiosError, AxiosInstance } from 'axios';
 
-import { debug } from '../index';
+import { debug } from '../debug';
 
 export type fetchFunction = 'getRegions' | 'getSystems' | 'getTypes' | 'getConstellations';
 
@@ -47,7 +47,7 @@ export class ESIService {
     public async getTypes() {
 
         const url = EVE.getUniverseTypesUrl(1);
-        const types = [];
+        const types: number[] = [];
 
         let pageCount: number | undefined;
         if (!CacheController.isExpired(this.cacheController.responseCache[url])) {

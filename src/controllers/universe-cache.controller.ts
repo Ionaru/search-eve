@@ -4,7 +4,7 @@ import * as moment from 'moment';
 import * as path from 'path';
 
 import { EVEFuse } from '../EVEFuse';
-import { debug } from '../index';
+import { debug } from '../debug';
 import { ESIService, fetchFunction } from '../services/esi.service';
 
 export interface ICache {
@@ -27,7 +27,7 @@ interface ICacheTypes {
 
 export class UniverseCacheController {
 
-    private static readFileContents(filePath: string): string | undefined {
+    private static readFileContents(filePath: string): string | void {
         if (fs.existsSync(filePath)) {
             try {
                 return fs.readFileSync(filePath).toString();
@@ -36,7 +36,6 @@ export class UniverseCacheController {
                 UniverseCacheController.deleteFile(filePath);
             }
         }
-        return;
     }
 
     private static deleteFile(filePath: string) {
