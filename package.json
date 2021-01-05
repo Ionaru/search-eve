@@ -42,7 +42,7 @@
         "@ionaru/eve-utils": "^5.0.0",
         "@ionaru/micro-web-service": "0.0.2-5.0",
         "agentkeepalive": "^4.1.0",
-        "axios": "^0.19.2",
+        "axios": "^0.21.1",
         "cors": "^2.8.5",
         "debug": "^4.1.1",
         "escape-string-regexp": "^3.0.0",
