@@ -1,7 +1,7 @@
 import { IUniverseNamesDataUnit } from '@ionaru/eve-utils';
-import * as Fuse from 'fuse.js';
+import Fuse from 'fuse.js';
 
-export class EVEFuse extends Fuse<IUniverseNamesDataUnit, Fuse.IFuseOptions<IUniverseNamesDataUnit>> {
+export class EVEFuse extends Fuse<IUniverseNamesDataUnit> {
     constructor(possibilities: ReadonlyArray<IUniverseNamesDataUnit>) {
         super(possibilities, {
             distance: 100,

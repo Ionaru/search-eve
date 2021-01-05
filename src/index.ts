@@ -1,6 +1,6 @@
 
 import { CacheController, PublicESIService } from '@ionaru/esi-service';
-import { ServiceController } from '@ionaru/micro-web-service';
+import { NotFoundRoute, ServiceController } from '@ionaru/micro-web-service';
 import { HttpsAgent } from 'agentkeepalive';
 import axios from 'axios';
 import * as cors from 'cors';
@@ -8,7 +8,6 @@ import * as path from 'path';
 
 import { UniverseCacheController } from './controllers/universe-cache.controller';
 import { GuessRouter } from './routers/guess.router';
-import { NotFoundRouter } from './routers/not-found.router';
 import { ESIService } from './services/esi.service';
 import { GuessService } from './services/guess.service';
 
@@ -45,7 +44,6 @@ async function start() {
     const guessService = new GuessService(universeCacheController, esiService);
 
     const guessRouter = new GuessRouter(guessService);
-    const notFoundRouter = new NotFoundRouter();
 
     const serverPort = process.env.SEARCHEVE_PORT || 3000;
     await new ServiceController({
@@ -55,7 +53,7 @@ async function start() {
         port: Number(serverPort),
         routes: [
             ['/', guessRouter],
-            ['*', notFoundRouter],
+            ['*', new NotFoundRoute()],
         ],
     }).listen();
 

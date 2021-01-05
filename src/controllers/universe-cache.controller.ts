@@ -99,7 +99,7 @@ export class UniverseCacheController {
             });
         }, UniverseCacheController.timeUntilNoon);
 
-        fs.writeFileSync(`${this.dataPath}/${(this.serverVersionFileName)}`, this.serverVersion);
+        fs.writeFileSync(`${this.dataPath}/${(this.serverVersionFileName)}`, this.serverVersion || '');
     }
 
     private static get timeUntilNoon() {

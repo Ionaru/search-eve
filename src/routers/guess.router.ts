@@ -1,5 +1,5 @@
 import { BaseRouter, Request, Response } from '@ionaru/micro-web-service';
-import * as httpStatus from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
 
 import { GuessService, searchFunction } from '../services/guess.service';
 
@@ -11,20 +11,20 @@ export class GuessRouter extends BaseRouter {
         const query = request.query.q!.trim().toLowerCase();
 
         if (!query.length) {
-            return GuessRouter.send404(response);
+            return GuessRouter.sendNotFound(response, query);
         }
 
         if (query.length > GuessRouter.guessService.longestAllowed) {
-            return GuessRouter.sendResponse(response, httpStatus.BAD_REQUEST, 'Query too long');
+            return GuessRouter.sendResponse(response, StatusCodes.BAD_REQUEST, 'Query too long');
         }
 
         const answer = await GuessRouter.guessService[searcher](query);
 
         if (!answer) {
-            return GuessRouter.send404(response);
+            return GuessRouter.sendNotFound(response, query);
         }
 
-        return GuessRouter.sendSuccessResponse(response, answer);
+        return GuessRouter.sendSuccess(response, answer);
     }
 
     @GuessRouter.requestDecorator(GuessRouter.checkQueryParameters, 'q')
@@ -50,7 +50,7 @@ export class GuessRouter extends BaseRouter {
     private static async shortcuts(_request: Request, response: Response) {
 
         const shortcuts = Object.entries(GuessService.shortcuts);
-        return GuessRouter.sendSuccessResponse(response, shortcuts);
+        return GuessRouter.sendSuccess(response, shortcuts);
     }
 
     constructor(guessService: GuessService) {
