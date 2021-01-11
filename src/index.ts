@@ -3,7 +3,7 @@ import { CacheController, PublicESIService } from '@ionaru/esi-service';
 import { NotFoundRoute, ServiceController } from '@ionaru/micro-web-service';
 import { HttpsAgent } from 'agentkeepalive';
 import axios from 'axios';
-import * as cors from 'cors';
+import cors from 'cors';
 import * as path from 'path';
 
 import { UniverseCacheController } from './controllers/universe-cache.controller';

@@ -4,6 +4,7 @@
         "declaration": true,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
+        "esModuleInterop": true,
         "strict": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,

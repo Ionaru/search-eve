@@ -1,5 +1,5 @@
 import { IUniverseNamesData, IUniverseNamesDataUnit } from '@ionaru/eve-utils';
-import * as escapeStringRegexp from 'escape-string-regexp';
+import escapeStringRegexp from 'escape-string-regexp';
 
 import { ICacheObject, UniverseCacheController } from '../controllers/universe-cache.controller';
 import { EVEFuse } from '../EVEFuse';
