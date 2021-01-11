@@ -62,7 +62,7 @@ export class ESIService {
         }
 
         if (pageCount && pageCount > 1) {
-            const pageIterable = generateNumbersArray(pageCount, 2);
+            const pageIterable = generateNumbersArray(pageCount - 1, 2);
             await Promise.all(pageIterable.map(async (page) => {
                 const pageResponse = await this.fetchData<number[]>(EVE.getUniverseTypesUrl(page));
                 types.push(...pageResponse);
