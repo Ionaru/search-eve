@@ -81,7 +81,11 @@ export class UniverseCacheController {
             const data = await this.cacheUniverse(cacheValid, type, fetcher);
 
             if (!data.length) {
-                fs.unlinkSync(`${this.dataPath}/${this.serverVersionFileName}`);
+                try {
+                    fs.unlinkSync(`${this.dataPath}/${this.serverVersionFileName}`);
+                } catch {
+                    process.emitWarning(`Unable to delete ${this.dataPath}/${this.serverVersionFileName}`)
+                }
                 throw new Error('Universe data incomplete, unable to create new cache');
             }
 
