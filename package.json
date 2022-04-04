@@ -41,7 +41,7 @@
         "@ionaru/eve-utils": "^7.3.1",
         "@ionaru/micro-web-service": "^2.0.0",
         "agentkeepalive": "^4.1.3",
-        "axios": "^0.21.1",
+        "axios": "^0.21.2",
         "chalk": "^4.1.0",
         "cors": "^2.8.5",
         "debug": "^4.3.1",
