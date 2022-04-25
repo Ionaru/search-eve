@@ -1,11 +1,12 @@
-import { IUniverseNamesData, IUniverseNamesDataUnit } from '@ionaru/eve-utils';
 import * as fs from 'fs';
-import * as moment from 'moment';
 import * as path from 'path';
 
-import { EVEFuse } from '../EVEFuse';
+import { IUniverseNamesData, IUniverseNamesDataUnit } from '@ionaru/eve-utils';
+import moment from 'moment';
+
 import { debug } from '../debug';
-import { ESIService, fetchFunction } from '../services/esi.service';
+import { EVEFuse } from '../EVEFuse';
+import { ESIService, FetchFunction } from '../services/esi.service';
 
 export interface ICache {
     [type: string]: ICacheObject;
@@ -22,10 +23,36 @@ interface ICachedGuesses {
 }
 
 interface ICacheTypes {
-    [type: string]: fetchFunction;
+    [type: string]: FetchFunction;
 }
 
 export class UniverseCacheController {
+
+    public serverVersion?: string;
+
+    public readonly cache: ICache = {};
+
+    private readonly debug = debug.extend('UniverseCacheController');
+
+    private readonly serverVersionFileName = 'serverVersion.txt';
+
+    public constructor(
+        private readonly dataPath: string,
+        private readonly esiService: ESIService,
+    ) {
+
+        if (!fs.existsSync(this.dataPath)) {
+            fs.mkdirSync(this.dataPath, { recursive: true });
+        }
+    }
+
+    private static get timeUntilNoon() {
+        let noon = moment.utc().hours(12).minute(0).second(0).millisecond(0);
+        if (moment.utc().isAfter(noon)) {
+            noon = noon.add(1, 'day');
+        }
+        return noon.valueOf() - Date.now();
+    }
 
     private static readFileContents(filePath: string): string | void {
         if (fs.existsSync(filePath)) {
@@ -48,25 +75,6 @@ export class UniverseCacheController {
         }
     }
 
-    public serverVersion?: string;
-
-    public readonly cache: ICache = {};
-
-    private readonly debug = debug.extend('UniverseCacheController');
-
-    private readonly serverVersionFileName = 'serverVersion.txt';
-    private readonly dataPath: string;
-    private readonly esiService: ESIService;
-
-    constructor(dataPath: string, esiService: ESIService) {
-        this.dataPath = dataPath;
-        this.esiService = esiService;
-
-        if (!fs.existsSync(this.dataPath)) {
-            fs.mkdirSync(this.dataPath, {recursive: true});
-        }
-    }
-
     public async doUpdateCycle() {
         const cacheValid = await this.checkCacheValidity();
 
@@ -84,7 +92,7 @@ export class UniverseCacheController {
                 try {
                     fs.unlinkSync(`${this.dataPath}/${this.serverVersionFileName}`);
                 } catch {
-                    process.emitWarning(`Unable to delete ${this.dataPath}/${this.serverVersionFileName}`)
+                    process.emitWarning(`Unable to delete ${this.dataPath}/${this.serverVersionFileName}`);
                 }
                 throw new Error('Universe data incomplete, unable to create new cache');
             }
@@ -104,14 +112,6 @@ export class UniverseCacheController {
         }, UniverseCacheController.timeUntilNoon);
 
         fs.writeFileSync(`${this.dataPath}/${(this.serverVersionFileName)}`, this.serverVersion || '');
-    }
-
-    private static get timeUntilNoon() {
-        let noon = moment.utc().hours(12).minute(0).second(0).millisecond(0);
-        if (moment.utc().isAfter(noon)) {
-            noon = noon.add(1, 'day');
-        }
-        return noon.valueOf() - Date.now();
     }
 
     private async checkCacheValidity(): Promise<boolean> {
@@ -137,7 +137,7 @@ export class UniverseCacheController {
         return false;
     }
 
-    private async cacheUniverse(useCache: boolean, type: string, fetcher: fetchFunction): Promise<IUniverseNamesData> {
+    private async cacheUniverse(useCache: boolean, type: string, fetcher: FetchFunction): Promise<IUniverseNamesData> {
         const savePath = `${this.dataPath}/${type}.json`;
 
         if (useCache) {

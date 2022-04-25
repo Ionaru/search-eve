@@ -1,16 +1,18 @@
+import { sortArrayByObjectPropertyLength } from '@ionaru/array-utils';
 import { IUniverseNamesData, IUniverseNamesDataUnit } from '@ionaru/eve-utils';
 import escapeStringRegexp from 'escape-string-regexp';
 
 import { ICacheObject, UniverseCacheController } from '../controllers/universe-cache.controller';
-import { EVEFuse } from '../EVEFuse';
 import { debug } from '../debug';
+import { EVEFuse } from '../EVEFuse';
+
 import { ESIService } from './esi.service';
 
 interface IShortcuts {
     [shortcut: string]: string;
 }
 
-export type searchFunction = 'searchType' | 'searchRegion' | 'searchConstellation' | 'searchSystem';
+export type SearchFunction = 'searchType' | 'searchRegion' | 'searchConstellation' | 'searchSystem';
 
 export class GuessService {
 
@@ -30,6 +32,23 @@ export class GuessService {
         vni: 'Vexor Navy Issue',
     };
 
+    public readonly longestAllowed: number;
+
+    private readonly debug = debug.extend('GuessService');
+
+    public constructor(
+        private readonly universeCacheController: UniverseCacheController,
+        private readonly esiService: ESIService,
+    ) {
+
+        this.longestAllowed = Math.max(...[
+            ...this.universeCacheController.cache.types.data,
+            ...this.universeCacheController.cache.regions.data,
+            ...this.universeCacheController.cache.constellations.data,
+            ...this.universeCacheController.cache.systems.data,
+        ].map((element) => element.name.length));
+    }
+
     private static matchWithRegex(possibility: IUniverseNamesDataUnit, regex: RegExp) {
         return possibility.name ? possibility.name.match(regex) || undefined : undefined;
     }
@@ -39,24 +58,6 @@ export class GuessService {
             .replace(/'/g, '')
             .replace(/"/g, '')
             .replace(/,/g, '');
-    }
-
-    public readonly longestAllowed: number;
-
-    private readonly debug = debug.extend('GuessService');
-    private readonly universeCacheController: UniverseCacheController;
-    private readonly esiService: ESIService;
-
-    constructor(universeCacheController: UniverseCacheController, esiService: ESIService) {
-        this.universeCacheController = universeCacheController;
-        this.esiService = esiService;
-
-        this.longestAllowed = Math.max(...[
-            ...this.universeCacheController.cache.types.data,
-            ...this.universeCacheController.cache.regions.data,
-            ...this.universeCacheController.cache.constellations.data,
-            ...this.universeCacheController.cache.systems.data,
-        ].map((element) => element.name.length));
     }
 
     // noinspection JSUnusedGlobalSymbols
@@ -142,9 +143,7 @@ export class GuessService {
 
         if (!possibilities.length) {
             // Check in middle of words.
-            possibilities.push(...data.filter((possibility) => {
-                return possibility.name.toLowerCase().includes(query);
-            }));
+            possibilities.push(...data.filter((possibility) => possibility.name.toLowerCase().includes(query)));
         }
 
         possibilities = await this.filterUnpublishedTypes(possibilities);
@@ -161,7 +160,7 @@ export class GuessService {
         if (possibilities.length) {
             // Sort by word length, shortest is usually the correct one.
             possibilities = await this.filterUnpublishedTypes(possibilities);
-            possibilities = this.sortArrayByObjectPropertyLength(possibilities, 'name');
+            sortArrayByObjectPropertyLength(possibilities, (possibility) => possibility.name);
             if (possibilities.length) {
                 answer = possibilities[0];
             }
@@ -169,14 +168,12 @@ export class GuessService {
 
         if (!answer && raw) {
             // Strip special characters from possibilities and try guessing again.
-            const list = data.map((possibility) => {
-                return {
-                    category: possibility.category,
-                    id: possibility.id,
-                    name: GuessService.replaceSpecialCharacters(possibility.name).toLowerCase(),
-                    originalName: possibility.name,
-                };
-            });
+            const list = data.map((possibility) => ({
+                category: possibility.category,
+                id: possibility.id,
+                name: GuessService.replaceSpecialCharacters(possibility.name).toLowerCase(),
+                originalName: possibility.name,
+            }));
             answer = await this.search(query, list, fuse, false);
         }
 
@@ -217,19 +214,5 @@ export class GuessService {
         }));
 
         return filteredPossibilities;
-    }
-
-    private sortArrayByObjectPropertyLength<T>(array: T[], property: string, inverse = false): T[] {
-        function compare(a: any, b: any) {
-            if (a[property].length < b[property].length) {
-                return inverse ? 1 : -1;
-            }
-            if (a[property].length > b[property].length) {
-                return inverse ? -1 : 1;
-            }
-            return 0;
-        }
-
-        return array.sort(compare);
     }
 }

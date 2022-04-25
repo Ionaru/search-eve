@@ -5,20 +5,17 @@ import { AxiosError, AxiosInstance } from 'axios';
 
 import { debug } from '../debug';
 
-export type fetchFunction = 'getRegions' | 'getSystems' | 'getTypes' | 'getConstellations';
+export type FetchFunction = 'getRegions' | 'getSystems' | 'getTypes' | 'getConstellations';
 
 export class ESIService {
 
     private readonly debug = debug.extend('ESIService');
-    private readonly publicESIService: PublicESIService;
-    private readonly cacheController: CacheController;
-    private readonly axiosInstance: AxiosInstance;
 
-    constructor(publicESIService: PublicESIService, cacheController: CacheController, axiosInstance: AxiosInstance) {
-        this.publicESIService = publicESIService;
-        this.cacheController = cacheController;
-        this.axiosInstance = axiosInstance;
-    }
+    public constructor(
+        private readonly publicESIService: PublicESIService,
+        private readonly cacheController: CacheController,
+        private readonly axiosInstance: AxiosInstance
+    ) { }
 
     public async getStatus() {
         return this.fetchData<IStatusData>(EVE.getStatusUrl());
@@ -49,11 +46,12 @@ export class ESIService {
         const url = EVE.getUniverseTypesUrl(1);
         const types: number[] = [];
 
+        const cacheEntry = this.cacheController.responseCache[url];
+
         let pageCount: number | undefined;
-        if (!CacheController.isExpired(this.cacheController.responseCache[url])) {
-            const cache = this.cacheController.responseCache[url];
-            types.push(...cache!.data);
-            pageCount = Number(cache!.headers['x-pages']);
+        if (cacheEntry && !CacheController.isExpired(cacheEntry)) {
+            types.push(...cacheEntry.data);
+            pageCount = Number(cacheEntry.headers['x-pages']);
         } else {
             const pageResponse = await this.publicESIService.fetchESIDataRaw<number[]>(url);
             types.push(...pageResponse.data);
@@ -75,18 +73,15 @@ export class ESIService {
     public async getNames(ids: number[]): Promise<IUniverseNamesData> {
 
         const names: IUniverseNamesData = [];
-        const idsCopy = ids.slice();
+        const idsCopy = [...ids];
 
-        while (true) {
+        while (idsCopy.length) {
             const idsPart = idsCopy.splice(0, 1000);
             const namesPart = await this.getNamesChunk(idsPart);
             names.push(...namesPart);
-
-            if (idsPart.length < 1000) {
-                return names;
-            }
         }
 
+        return names;
     }
 
     private async getNamesChunk(ids: number[]): Promise<IUniverseNamesData> {
@@ -102,9 +97,11 @@ export class ESIService {
     private async fetchData<T>(url: string, retry = false): Promise<T> {
         return this.publicESIService.fetchESIData<T>(url).catch((error: AxiosError) => {
 
-            if (this.cacheController.responseCache[url]) {
+            const cacheEntry = this.cacheController.responseCache[url];
+
+            if (cacheEntry) {
                 process.emitWarning(`Request failed: ${url}, using cached data.`);
-                return this.cacheController.responseCache[url]!.data as T;
+                return cacheEntry.data as T;
             }
 
             if (!retry) {
