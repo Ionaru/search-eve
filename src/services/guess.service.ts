@@ -12,6 +12,10 @@ interface IShortcuts {
     [shortcut: string]: string;
 }
 
+interface IAnswerData extends IUniverseNamesDataUnit {
+    fuzzy?: boolean;
+}
+
 export type SearchFunction = 'searchType' | 'searchRegion' | 'searchConstellation' | 'searchSystem';
 
 export class GuessService {
@@ -95,7 +99,7 @@ export class GuessService {
         return answer;
     }
 
-    private async search(query: string, data: IUniverseNamesData, fuse: EVEFuse, raw = true): Promise<IUniverseNamesDataUnit | undefined> {
+    private async search(query: string, data: IUniverseNamesData, fuse: EVEFuse, raw = true): Promise<IAnswerData | undefined> {
         query = escapeStringRegexp(query);
 
         // Check if the item is an ID
@@ -104,7 +108,7 @@ export class GuessService {
             return item;
         }
 
-        let possibilities: IUniverseNamesData = [];
+        let possibilities: IAnswerData[] = [];
         let answer: IUniverseNamesDataUnit | undefined;
 
         const words = query.split(' ');
@@ -153,7 +157,7 @@ export class GuessService {
             const fuseGuess = fuse.search(query)[0];
 
             if (fuseGuess) {
-                possibilities.push(fuseGuess.item);
+                possibilities.push({...fuseGuess.item, fuzzy: true});
             }
         }
 
