@@ -38,8 +38,8 @@ COPY --from=build /app/dist ./dist
 RUN mkdir -p /app/data && chown -R node:node /app
 VOLUME /app/data
 
-# The port is fixed inside the container. Compose maps it to a host port, so
-# SEARCHEVE_PORT is deliberately not passed in.
+# The service always listens on 3000. Nothing is published to the host; a
+# reverse proxy reaches it over a shared Docker network.
 EXPOSE 3000
 
 USER node
