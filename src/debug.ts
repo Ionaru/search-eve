@@ -1,3 +1,3 @@
-import Debug from 'debug';
+import createDebug from 'debug';
 
-export const debug = Debug('search-eve');
+export const debug = createDebug('search-eve');

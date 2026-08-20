@@ -1,0 +1,14 @@
+# pnpm 11 reads its settings from this file. Only auth and registry settings are
+# still read from .npmrc, which is why tagVersionPrefix lives here now.
+tagVersionPrefix: ""
+
+# Nothing in this project needs a build script at install time.
+onlyBuiltDependencies: []
+
+peerDependencyRules:
+    allowedVersions:
+        # esi-service 6.1.0 declares a peer of axios "0.21.1 - 0.26", but it only uses
+        # the small part of the API that is unchanged in axios 1, and TheraBot runs the
+        # same combination in production. Without this rule pnpm's auto-install-peers
+        # would install a second, vulnerable axios 0.26 underneath esi-service.
+        "@ionaru/esi-service>axios": "1"

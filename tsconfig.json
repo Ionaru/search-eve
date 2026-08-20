@@ -1,28 +1,24 @@
 {
     "compilerOptions": {
-        "baseUrl": "",
-        "declaration": true,
-        "experimentalDecorators": true,
-        "emitDecoratorMetadata": true,
         "esModuleInterop": true,
-        "strict": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "noImplicitReturns": true,
-        "noFallthroughCasesInSwitch": true,
-        "removeComments": false,
-        "resolveJsonModule": true,
+        "experimentalDecorators": true,
+        "forceConsistentCasingInFileNames": true,
         "lib": [
-            "esnext"
+            "es2023"
         ],
         "module": "commonjs",
-        "moduleResolution": "node",
+        "moduleResolution": "node10",
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitReturns": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
         "outDir": "dist",
+        "removeComments": false,
+        "resolveJsonModule": true,
+        "skipLibCheck": true,
         "sourceMap": true,
-        "target": "es2019",
-        "typeRoots": [
-            "node_modules/@types"
-        ]
+        "strict": true,
+        "target": "es2023"
     },
     "files": [
         "src/index.ts"

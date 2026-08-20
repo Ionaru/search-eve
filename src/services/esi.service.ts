@@ -1,4 +1,3 @@
-import { generateNumbersArray } from '@ionaru/array-utils';
 import { CacheController, PublicESIService } from '@ionaru/esi-service';
 import { EVE, IStatusData, IUniverseNamesData, IUniverseTypeData } from '@ionaru/eve-utils';
 import { AxiosError, AxiosInstance } from 'axios';
@@ -14,7 +13,7 @@ export class ESIService {
     public constructor(
         private readonly publicESIService: PublicESIService,
         private readonly cacheController: CacheController,
-        private readonly axiosInstance: AxiosInstance
+        private readonly axiosInstance: AxiosInstance,
     ) { }
 
     public async getStatus() {
@@ -60,8 +59,9 @@ export class ESIService {
         }
 
         if (pageCount && pageCount > 1) {
-            const pageIterable = generateNumbersArray(pageCount - 1, 2);
-            await Promise.all(pageIterable.map(async (page) => {
+            // Page 1 is already fetched above, so continue from page 2.
+            const remainingPages = Array.from({length: pageCount - 1}, (_, index) => index + 2);
+            await Promise.all(remainingPages.map(async (page) => {
                 const pageResponse = await this.fetchData<number[]>(EVE.getUniverseTypesUrl(page));
                 types.push(...pageResponse);
             }));
@@ -75,7 +75,7 @@ export class ESIService {
         const names: IUniverseNamesData = [];
         const idsCopy = [...ids];
 
-        while (idsCopy.length) {
+        while (idsCopy.length > 0) {
             const idsPart = idsCopy.splice(0, 1000);
             const namesPart = await this.getNamesChunk(idsPart);
             names.push(...namesPart);
@@ -89,9 +89,13 @@ export class ESIService {
         const body = JSON.stringify(ids);
 
         this.debug(url, body);
-        const namesResponse = await this.axiosInstance.post<IUniverseNamesData>(url, body).catch(() => undefined);
 
-        return namesResponse ? namesResponse.data : [];
+        try {
+            const namesResponse = await this.axiosInstance.post<IUniverseNamesData>(url, body);
+            return namesResponse.data;
+        } catch {
+            return [];
+        }
     }
 
     private async fetchData<T>(url: string, retry = false): Promise<T> {
@@ -112,7 +116,9 @@ export class ESIService {
             let reason = '<unknown>';
 
             if (error.response) {
-                reason = error.response.data;
+                reason = typeof error.response.data === 'string'
+                    ? error.response.data
+                    : JSON.stringify(error.response.data);
             }
 
             process.stderr.write(`Request failed: ${url}, ${reason}\n`);

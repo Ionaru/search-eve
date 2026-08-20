@@ -1,39 +1,161 @@
 name: search-eve CD
 
 on:
-    push:
-        branches:
-            - master
-    pull_request:
-        branches:
-            - master
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+env:
+  NODE_VERSION: "24"
 
 jobs:
-    test:
+  audit:
+    name: Audit dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      # Reads pnpm-lock.yaml directly, so no install is needed.
+      - run: pnpm audit --prod
 
-        runs-on: ubuntu-latest
+  get_sha:
+    name: Get short SHA for image tags
+    runs-on: ubuntu-latest
+    outputs:
+      sha_short: ${{ steps.get_sha.outputs.sha_short }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: get_sha
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v3
+  test:
+    name: Lint and build
+    needs: [audit]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run lint
+      - run: pnpm run build
 
-            - name: Set up Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: '16'
+  build-image:
+    name: Build image
+    needs: [audit]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: docker compose -f deploy/compose.yaml build search-eve
+      - run: docker save -o search-eve-image.tar ghcr.io/ionaru/search-eve:latest
+      - uses: actions/upload-artifact@v7
+        with:
+          name: search-eve-image
+          path: search-eve-image.tar
+          retention-days: 1
 
-            - name: Audit
-              run: npm audit
+  push-image:
+    name: Push image
+    if: github.event_name == 'push'
+    needs: [get_sha, test, build-image]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: search-eve-image
+      - run: docker load -i search-eve-image.tar
+      - run: docker tag ghcr.io/ionaru/search-eve:latest ghcr.io/ionaru/search-eve:${{ needs.get_sha.outputs.sha_short }}
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - run: docker push -a ghcr.io/ionaru/search-eve
 
-            - name: Install packages
-              run: npm install
+  deploy:
+    name: Deploy
+    needs: [get_sha, push-image]
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    concurrency:
+      group: deploy
+      cancel-in-progress: false
+    steps:
+      - uses: appleboy/ssh-action@v1.2.5
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          GIT_REVISION: ${{ needs.get_sha.outputs.sha_short }}
+        with:
+          command_timeout: 20m
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          envs: DEPLOY_PATH,GIT_REVISION
+          script: |
+            set -eu
 
-            - name: Run tests
-              run: npm test
+            cd "$DEPLOY_PATH"
 
-            - name: Build
-              run: npm run build
+            # Match the checkout to the commit whose image was just published, so the
+            # compose file on disk and the running image always come from one commit.
+            git fetch --prune origin
+            git checkout --force "$GIT_REVISION"
 
-            - name: Deploy
-              if: github.event_name == 'push'
-              run: npx -q @ionaru/teamcity-deploy teamcity.saturnserver.org SearchEve_Build ${{ secrets.API_TOKEN }}
+            export SEARCHEVE_GIT_REVISION="$GIT_REVISION"
+
+            # --env-file is not optional. Compose does not auto-discover a .env at the
+            # checkout root when the compose file lives in deploy/, so without it the
+            # stack silently runs :latest against a named volume with no configuration.
+            #
+            # This body must stay a SINGLE command. A shell function used as the left
+            # operand of || runs with errexit disabled, so a multi-command body would
+            # keep going after a failure and return the last command's status, losing
+            # the real exit code.
+            compose() {
+              docker compose \
+                --project-name search-eve \
+                --env-file "$DEPLOY_PATH/.env" \
+                --file "$DEPLOY_PATH/deploy/compose.yaml" \
+                "$@"
+            }
+
+            compose pull
+
+            # The service has a healthcheck, so --wait blocks until it reports healthy
+            # rather than merely "running". A cold start rebuilds the entire universe
+            # cache from ESI before the port opens, so allow 15 minutes.
+            # "|| rc=$?" stops errexit aborting before the logs are printed.
+            rc=0
+            compose up --detach --pull=never --no-build --remove-orphans \
+              --wait --wait-timeout 900 || rc=$?
+
+            compose logs --tail=200 search-eve
+
+            if [ "$rc" -ne 0 ]; then
+              exit "$rc"
+            fi
+
+            # Reclaim disk from superseded search-eve images only. Other stacks share
+            # this Docker daemon, so a global "docker system prune --all" would delete
+            # theirs.
+            stale="$(docker image ls --format '{{.Repository}}:{{.Tag}}' \
+              --filter 'reference=ghcr.io/ionaru/search-eve' \
+              | grep -vx "ghcr.io/ionaru/search-eve:${GIT_REVISION}" || true)"
+            if [ -n "$stale" ]; then
+              echo "$stale" | xargs -r docker image rm --force || true
+            fi

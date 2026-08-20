@@ -12,6 +12,7 @@ coverage/
 dist/
 
 # Local application files
+.env
 logs/
 data/
 
