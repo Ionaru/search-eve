@@ -14,7 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Switched the package manager from npm to pnpm
 - Moved the Docker setup to `deploy/`, with a Compose v2 `compose.yaml`
-- `SEARCHEVE_PORT` is now the host port; the container always listens on 3000
+- The service is no longer published on a host port; it joins the external `edge` network and is
+  reached at `search-eve:3000` by a reverse proxy. `SEARCHEVE_PORT` is gone and the port is fixed
 - The container runs as the unprivileged `node` user
 - Updated to Node.js 24 and TypeScript 5.9
 - Updated all dependencies and GitHub Actions to current versions

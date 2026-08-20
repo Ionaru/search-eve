@@ -6,9 +6,10 @@ services:
       dockerfile: deploy/Dockerfile
     environment:
       - DEBUG
-    ports:
-      # SEARCHEVE_PORT is the *host* port. The container always listens on 3000.
-      - "${SEARCHEVE_PORT:-3000}:3000"
+    # No published ports. The service listens on 3000 and is reached over the
+    # "edge" network by the reverse proxy, as http://search-eve:3000.
+    networks:
+      - edge
     volumes:
       - ${SEARCHEVE_DATA_VOLUME:-data}:/app/data
     restart: unless-stopped
@@ -28,6 +29,11 @@ services:
       retries: 3
       start_period: 10m
       start_interval: 15s
+
+networks:
+  # Shared with the reverse proxy; created outside this stack.
+  edge:
+    external: true
 
 volumes:
   data:

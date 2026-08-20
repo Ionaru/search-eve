@@ -36,17 +36,28 @@ hit from a best guess.
 ## Self-hosting
 It is possible to self-host this service. It requires Docker with the Compose v2 plugin.
 
+Search EVE does not publish a port. It listens on port 3000 and expects a reverse proxy in front of
+it, reached over a shared Docker network named `edge`.
+
 1. Install [Docker Engine](https://docs.docker.com/engine/install/), which includes the Compose v2 plugin.
 2. Clone this repository, or [download](https://github.com/Ionaru/search-eve/archive/master.zip) and extract it.
-3. Create a `.env` file in the root of the checkout. Every variable is optional:
+3. Create the shared network, if your reverse proxy has not already created it:
+
+   ```bash
+   docker network create edge
+   ```
+
+   The Compose file declares this network as `external`, so it will **not** create it for you and
+   startup fails if it is missing.
+
+4. Create a `.env` file in the root of the checkout. Every variable is optional:
 
    ```dotenv
    # Optional, see the table below.
-   SEARCHEVE_PORT=3000
    SEARCHEVE_DATA_VOLUME=/absolute/path/to/your/data
    ```
 
-4. Start the service:
+5. Start the service:
 
    ```bash
    docker compose --project-name search-eve --env-file "$PWD/.env" --file deploy/compose.yaml up -d
@@ -54,9 +65,9 @@ It is possible to self-host this service. It requires Docker with the Compose v2
 
    The `--env-file` flag is not optional. The Compose file lives in `deploy/`, so Compose looks for a
    `.env` next to it and will **not** find the one in the root of the checkout. Without the flag the
-   service starts on the default port and writes its caches somewhere you did not intend.
+   service runs `:latest` and writes its caches somewhere you did not intend.
 
-5. Check that it came up:
+6. Check that it came up:
 
    ```bash
    docker compose --project-name search-eve --env-file "$PWD/.env" --file deploy/compose.yaml logs -f
@@ -67,21 +78,38 @@ system, constellation and region) before it opens its port, which takes several 
 container reports `starting` until that is done and `healthy` once it is serving. Subsequent starts
 reuse the cache in `/app/data` and are fast.
 
+Point your reverse proxy at `http://search-eve:3000`. Compose registers the service name as a
+network alias, so anything else attached to `edge` can resolve it. With Caddy that is:
+
+```caddyfile
+search.example.com {
+    reverse_proxy search-eve:3000
+}
+```
+
+If you would rather not run a reverse proxy, publish the port yourself with an override file next to
+the Compose file, `deploy/compose.override.yaml`:
+
+```yaml
+services:
+  search-eve:
+    ports:
+      - "3000:3000"
+```
+
 Run `docker compose ... config` instead of `up` at any point to print the fully resolved
-configuration. That is the quickest way to confirm your port and data directory are what you expect.
+configuration. That is the quickest way to confirm your networks and data directory are what you
+expect.
 
 ### Environment variables
 
 | Variable | Required | Description |
 | --- | --- | --- |
-| `SEARCHEVE_PORT` | No | The **host** port to publish the service on. Defaults to `3000`. |
 | `SEARCHEVE_DATA_VOLUME` | No | Where Search EVE keeps its caches. Defaults to a Docker named volume. |
 | `SEARCHEVE_GIT_REVISION` | No | Image tag to run. Defaults to `latest`. |
 | `DEBUG` | No | Set to `search-eve*` or `*` for extra logging output. |
 
-Inside the container the service always listens on port 3000; `SEARCHEVE_PORT` only changes the host
-port it is published on. If you run the service outside Docker, `SEARCHEVE_PORT` is instead the port
-the process itself binds to.
+The port is not configurable. The service always listens on 3000, both inside and outside Docker.
 
 `SEARCHEVE_DATA_VOLUME` must be either left unset, which uses the named volume declared in the
 Compose file, or set to an **absolute** host path. A relative path such as `./data` resolves against

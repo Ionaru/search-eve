@@ -44,12 +44,11 @@ const start = async () => {
 
     const guessService = new GuessService(universeCacheController, esiService);
 
-    const serverPort = process.env.SEARCHEVE_PORT || 3000;
     await new ServiceController({
         middleware: [
             cors(),
         ],
-        port: Number(serverPort),
+        port: 3000,
         routes: [
             ['/', new GuessRouter(guessService)],
             ['*', new NotFoundRoute()],
