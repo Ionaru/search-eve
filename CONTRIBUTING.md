@@ -14,16 +14,16 @@ You can [submit an issue️](https://github.com/Ionaru/search-eve/issues) on thi
 
 ### 📦 Prerequisites
 
-You need Node.js and npm.
+You need Node.js 24 or newer and pnpm.
 
-To install them on Debian-based systems:
+Install Node.js from [the official Node.js website](https://nodejs.org/en/download/), or with a
+version manager such as [fnm](https://github.com/Schniz/fnm) or [nvm](https://github.com/nvm-sh/nvm).
+
+pnpm ships with Node.js via Corepack, so no separate install is needed:
 
 ```bash
-curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
-sudo apt-get install -y nodejs
+corepack enable
 ```
-
-For other systems, please find information on [the official Node.js website](https://nodejs.org/en/download/).
 
 
 ### 🏗️ Installation
@@ -38,7 +38,7 @@ cd search-eve
 Then install the required dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 Yay! You are ready! 🍾
@@ -55,7 +55,7 @@ Please make sure any code you submit is compliant and compatible with this repos
 4. Fetch the latest changes from upstream: `git fetch upstream`.
 5. Create a new branch to work on: `git checkout -b MyNewFeatureName`.
 6. Write some awesome improvements, tests and commit your work.
-7. Make sure your changes comply with the established code: `npm run test`.
+7. Make sure your changes comply with the established code: `pnpm run lint` and `pnpm run build`.
 8. Push your changes to GitHub: `git push origin`.
 9. On GitHub, go to your forked branch, and click **New pull request**.
 10. Choose the correct branches, add a description and submit your pull request!

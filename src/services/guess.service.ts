@@ -1,10 +1,9 @@
-import { sortArrayByObjectPropertyLength } from '@ionaru/array-utils';
 import { IUniverseNamesData, IUniverseNamesDataUnit } from '@ionaru/eve-utils';
 import escapeStringRegexp from 'escape-string-regexp';
 
 import { ICacheObject, UniverseCacheController } from '../controllers/universe-cache.controller';
 import { debug } from '../debug';
-import { EVEFuse } from '../EVEFuse';
+import { EVEFuse } from '../eve-fuse';
 
 import { ESIService } from './esi.service';
 
@@ -59,9 +58,9 @@ export class GuessService {
 
     private static replaceSpecialCharacters(text: string): string {
         return text
-            .replace(/'/g, '')
-            .replace(/"/g, '')
-            .replace(/,/g, '');
+            .replaceAll('\'', '')
+            .replaceAll('"', '')
+            .replaceAll(',', '');
     }
 
     // noinspection JSUnusedGlobalSymbols
@@ -129,7 +128,7 @@ export class GuessService {
 
         possibilities = await this.filterUnpublishedTypes(possibilities);
 
-        if (!possibilities.length) {
+        if (possibilities.length === 0) {
             // Check in start of the words.
             const regex = new RegExp(`^${query}`, 'i');
             possibilities.push(...data.filter((possibility) => GuessService.matchWithRegex(possibility, regex)));
@@ -137,7 +136,7 @@ export class GuessService {
 
         possibilities = await this.filterUnpublishedTypes(possibilities);
 
-        if (!possibilities.length) {
+        if (possibilities.length === 0) {
             // Check at end of the words.
             const regex = new RegExp(`${query}$`, 'i');
             possibilities.push(...data.filter((possibility) => GuessService.matchWithRegex(possibility, regex)));
@@ -145,14 +144,14 @@ export class GuessService {
 
         possibilities = await this.filterUnpublishedTypes(possibilities);
 
-        if (!possibilities.length) {
+        if (possibilities.length === 0) {
             // Check in middle of words.
             possibilities.push(...data.filter((possibility) => possibility.name.toLowerCase().includes(query)));
         }
 
         possibilities = await this.filterUnpublishedTypes(possibilities);
 
-        if (!possibilities.length) {
+        if (possibilities.length === 0) {
             // Use Fuse to search (slow but fuzzy).
             const fuseGuess = fuse.search(query)[0];
 
@@ -161,11 +160,11 @@ export class GuessService {
             }
         }
 
-        if (possibilities.length) {
+        if (possibilities.length > 0) {
             // Sort by word length, shortest is usually the correct one.
             possibilities = await this.filterUnpublishedTypes(possibilities);
-            sortArrayByObjectPropertyLength(possibilities, (possibility) => possibility.name);
-            if (possibilities.length) {
+            possibilities.sort((a, b) => a.name.length - b.name.length);
+            if (possibilities.length > 0) {
                 answer = possibilities[0];
             }
         }
@@ -191,12 +190,12 @@ export class GuessService {
 
     private async getFromId(query: string, data: IUniverseNamesData): Promise<IUniverseNamesDataUnit | void> {
         const id = Number(query);
-        if (!isNaN(id)) {
+        if (!Number.isNaN(id)) {
             const item = data.find((possibility) => possibility.id === id);
 
             if (item) {
                 const publishedItems = await this.filterUnpublishedTypes([item]);
-                if (publishedItems.length) {
+                if (publishedItems.length > 0) {
                     return item;
                 }
             }

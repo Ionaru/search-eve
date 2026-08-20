@@ -1,11 +1,10 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 import { IUniverseNamesData, IUniverseNamesDataUnit } from '@ionaru/eve-utils';
-import moment from 'moment';
 
 import { debug } from '../debug';
-import { EVEFuse } from '../EVEFuse';
+import { EVEFuse } from '../eve-fuse';
 import { ESIService, FetchFunction } from '../services/esi.service';
 
 export interface ICache {
@@ -47,11 +46,13 @@ export class UniverseCacheController {
     }
 
     private static get timeUntilNoon() {
-        let noon = moment.utc().hours(12).minute(0).second(0).millisecond(0);
-        if (moment.utc().isAfter(noon)) {
-            noon = noon.add(1, 'day');
+        const now = new Date();
+        const noon = new Date(now);
+        noon.setUTCHours(12, 0, 0, 0);
+        if (now.getTime() > noon.getTime()) {
+            noon.setUTCDate(noon.getUTCDate() + 1);
         }
-        return noon.valueOf() - Date.now();
+        return noon.getTime() - now.getTime();
     }
 
     private static readFileContents(filePath: string): string | void {
@@ -69,9 +70,9 @@ export class UniverseCacheController {
         try {
             fs.unlinkSync(filePath);
             process.emitWarning(`File ${filePath} deleted.`);
-        } catch (e) {
-            process.stderr.write(`The file ${filePath} could not be deleted, please delete manually. Reason: ${e}`);
-            throw e;
+        } catch (error) {
+            process.stderr.write(`The file ${filePath} could not be deleted, please delete manually. Reason: ${error}`);
+            throw error;
         }
     }
 
@@ -88,7 +89,7 @@ export class UniverseCacheController {
         await Promise.all(Object.entries(cacheTypes).map(async ([type, fetcher]) => {
             const data = await this.cacheUniverse(cacheValid, type, fetcher);
 
-            if (!data.length) {
+            if (data.length === 0) {
                 try {
                     fs.unlinkSync(`${this.dataPath}/${this.serverVersionFileName}`);
                 } catch {
