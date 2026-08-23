@@ -50,27 +50,23 @@ it, reached over a shared Docker network named `edge`.
    The Compose file declares this network as `external`, so it will **not** create it for you and
    startup fails if it is missing.
 
-4. Create a `.env` file in the root of the checkout. Every variable is optional:
+4. Create a `.env` file next to `compose.yaml`. Every variable is optional:
 
    ```dotenv
    # Optional, see the table below.
    SEARCHEVE_DATA_VOLUME=/absolute/path/to/your/data
    ```
 
-5. Start the service:
+5. Start the service, from the root of the checkout:
 
    ```bash
-   docker compose --project-name search-eve --env-file "$PWD/.env" --file deploy/compose.yaml up -d
+   docker compose up -d
    ```
-
-   The `--env-file` flag is not optional. The Compose file lives in `deploy/`, so Compose looks for a
-   `.env` next to it and will **not** find the one in the root of the checkout. Without the flag the
-   service runs `:latest` and writes its caches somewhere you did not intend.
 
 6. Check that it came up:
 
    ```bash
-   docker compose --project-name search-eve --env-file "$PWD/.env" --file deploy/compose.yaml logs -f
+   docker compose logs -f
    ```
 
 The first start is slow. Search EVE downloads and caches the entire EVE Online universe (every type,
@@ -88,7 +84,7 @@ search.example.com {
 ```
 
 If you would rather not run a reverse proxy, publish the port yourself with an override file next to
-the Compose file, `deploy/compose.override.yaml`:
+the Compose file, `compose.override.yaml`:
 
 ```yaml
 services:
@@ -97,9 +93,8 @@ services:
       - "3000:3000"
 ```
 
-Run `docker compose ... config` instead of `up` at any point to print the fully resolved
-configuration. That is the quickest way to confirm your networks and data directory are what you
-expect.
+Run `docker compose config` instead of `up` at any point to print the fully resolved configuration.
+That is the quickest way to confirm your networks and data directory are what you expect.
 
 ### Environment variables
 
@@ -112,16 +107,16 @@ expect.
 The port is not configurable. The service always listens on 3000, both inside and outside Docker.
 
 `SEARCHEVE_DATA_VOLUME` must be either left unset, which uses the named volume declared in the
-Compose file, or set to an **absolute** host path. A relative path such as `./data` resolves against
-`deploy/`, not the root of the checkout. The container runs as the unprivileged `node` user, so a
-host directory needs to be writable by UID 1000.
+Compose file, or set to a host path. A relative path such as `./data` resolves against the directory
+holding `compose.yaml`. The container runs as the unprivileged `node` user, so a host directory needs
+to be writable by UID 1000.
 
 ### A note on architecture
 The prebuilt `ghcr.io/ionaru/search-eve` images are `linux/amd64` only. On other architectures the
 pull fails with a manifest error, and you will need to build the image locally instead:
 
 ```bash
-docker compose --project-name search-eve --env-file "$PWD/.env" --file deploy/compose.yaml up -d --build
+docker compose up -d --build
 ```
 
 Contact me in EVE Online: `Ionaru Otsada` or on Discord: `@ionaru` if you need any assistance.

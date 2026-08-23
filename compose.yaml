@@ -1,9 +1,12 @@
+# Pinned so the project name (and with it the container and volume names) does
+# not depend on what the checkout directory happens to be called.
+name: search-eve
+
 services:
   search-eve:
     image: ghcr.io/ionaru/search-eve:${SEARCHEVE_GIT_REVISION:-latest}
     build:
-      context: ../
-      dockerfile: deploy/Dockerfile
+      context: .
     environment:
       - DEBUG
     # No published ports. The service listens on 3000 and is reached over the

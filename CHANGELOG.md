@@ -13,7 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Switched the package manager from npm to pnpm
-- Moved the Docker setup to `deploy/`, with a Compose v2 `compose.yaml`
+- Rewrote the `Dockerfile` as a multi-stage build and replaced `docker-compose.yml` with a Compose
+  v2 `compose.yaml`
 - The service is no longer published on a host port; it joins the external `edge` network and is
   reached at `search-eve:3000` by a reverse proxy. `SEARCHEVE_PORT` is gone and the port is fixed
 - The container runs as the unprivileged `node` user
