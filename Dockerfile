@@ -1,5 +1,5 @@
 # ---- Build stage: compile TypeScript to dist/ ----
-FROM node:24-alpine AS build
+FROM node:26-alpine AS build
 
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 WORKDIR /app
@@ -17,7 +17,7 @@ RUN pnpm run build
 
 
 # ---- Runtime stage: production image ----
-FROM node:24-alpine AS runtime
+FROM node:26-alpine AS runtime
 
 ENV NODE_ENV=production
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
