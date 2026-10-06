@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@ionaru/esi-service':
         specifier: ^6.1.0
-        version: 6.1.0(axios@1.19.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0))(debug@4.4.3(supports-color@7.2.0))(http-status-codes@2.3.0)
+        version: 6.1.0(axios@1.20.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0))(debug@4.4.3(supports-color@7.2.0))(http-status-codes@2.3.0)
       '@ionaru/eve-utils':
         specifier: ^8.0.0
         version: 8.0.0
@@ -30,8 +30,8 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1(ajv@8.20.0)
       axios:
-        specifier: ^1.19.0
-        version: 1.19.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
+        specifier: ^1.20.0
+        version: 1.20.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
       cors:
         specifier: ^2.8.6
         version: 2.8.6
@@ -384,8 +384,8 @@ packages:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
 
-  axios@1.19.0:
-    resolution: {integrity: sha512-ht/iuYZXEjFxLH/Hkezgd7m6JKlHHXEUSneaDz8uZe1Gj5QZtCnpyDsckvAiEnT89OEbCLmnte4R4sn7P0EKFw==}
+  axios@1.20.0:
+    resolution: {integrity: sha512-r8aOh8j9cGKpgQAqpzrUHnSIc6a59Y3Xf/cv8sy1DrHCkZHzQGEuoq1tARk6qSyDdtQGSDgpb9kFlruzPvrgwg==}
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -785,8 +785,8 @@ packages:
   flatted@3.4.4:
     resolution: {integrity: sha512-5+ybhBZANEJxaH3X5evAFatUxLfEHSr7n6kYJ+1Qd0mUqr4eu9gIf6GDbWHf8RJijHrjjO8G+la14SlL2SeS1Q==}
 
-  follow-redirects@1.16.0:
-    resolution: {integrity: sha512-y5rN/uOsadFT/JfYwhxRS5R7Qce+g3zG97+JrtFZlC9klX/W5hD7iiLzScI4nZqUS7DNUdhPgw4xI8W2LuXlUw==}
+  follow-redirects@1.16.1:
+    resolution: {integrity: sha512-FNvFGzoMLWmE6Yj9spb/zjd7yiNCHiAW9/Tg9CXrQ8wuu32HtlJOwWO11OJafl5FfY3DxTdQ0vj42zU1kvv5jg==}
     engines: {node: '>=4.0'}
     peerDependencies:
       debug: '*'
@@ -1752,9 +1752,9 @@ snapshots:
 
   '@humanwhocodes/object-schema@2.0.3': {}
 
-  '@ionaru/esi-service@6.1.0(axios@1.19.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0))(debug@4.4.3(supports-color@7.2.0))(http-status-codes@2.3.0)':
+  '@ionaru/esi-service@6.1.0(axios@1.20.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0))(debug@4.4.3(supports-color@7.2.0))(http-status-codes@2.3.0)':
     dependencies:
-      axios: 1.19.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
+      axios: 1.20.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
       debug: 4.4.3(supports-color@7.2.0)
       http-status-codes: 2.3.0
 
@@ -2068,9 +2068,9 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.1.0
 
-  axios@1.19.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0):
+  axios@1.20.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0):
     dependencies:
-      follow-redirects: 1.16.0(debug@4.4.3(supports-color@7.2.0))
+      follow-redirects: 1.16.1(debug@4.4.3(supports-color@7.2.0))
       form-data: 4.0.6
       https-proxy-agent: 5.0.1(supports-color@7.2.0)
       proxy-from-env: 2.1.0
@@ -2640,7 +2640,7 @@ snapshots:
 
   flatted@3.4.4: {}
 
-  follow-redirects@1.16.0(debug@4.4.3(supports-color@7.2.0)):
+  follow-redirects@1.16.1(debug@4.4.3(supports-color@7.2.0)):
     optionalDependencies:
       debug: 4.4.3(supports-color@7.2.0)
 
